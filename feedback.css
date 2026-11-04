@@ -1,0 +1,146 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    /* Тъмен overlay + вашата снимка feedbackimage.png */
+    background: linear-gradient(rgba(11, 15, 25, 0.75), rgba(11, 15, 25, 0.85)), 
+                url('feedbackimage.png') no-repeat center center fixed;
+    background-size: cover;
+    color: #111827;
+    min-height: 100vh;
+}
+
+/* Навигация */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.subtitle {
+    color: #d97706;
+    font-weight: 600;
+}
+
+.nav-links a {
+    margin-left: 25px;
+    text-decoration: none;
+    color: #374151;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: #d97706;
+    border-bottom: 2px solid #d97706;
+    padding-bottom: 4px;
+}
+
+/* Основна секция */
+.hero-section {
+    padding: 40px 20px;
+    min-height: calc(100vh - 70px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-title {
+    color: #ffffff;
+    font-size: 2.2rem;
+    margin-bottom: 25px;
+    text-align: center;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+/* Карта с формата (Glassmorphism) */
+.glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    width: 100%;
+    max-width: 550px;
+    margin: 0 auto;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+}
+
+/* Полета на формата */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #374151;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #ea580c;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.2);
+}
+
+/* Бутон за изпращане */
+.btn-submit {
+    width: 100%;
+    background: #ea580c;
+    color: #ffffff;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background: #c2410c;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
+}
+
+.btn-submit:active {
+    transform: scale(0.98);
+}
+
+/* Съобщение за успех */
+.alert-success {
+    background: #dcfce7;
+    color: #15803d;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    text-align: center;
+    font-weight: 500;
+}
