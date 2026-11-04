@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Wildfire Trace | Разследвания</title>
+    <link rel="stylesheet" href="investigations.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">🔥 Wildfire Trace &nbsp;|&nbsp; <span class="subtitle">Разследвания</span></div>
+        <nav class="nav-links">
+            <a href="index.html">Начало</a>
+            <a href="fires.html">Пожари</a>
+            <a href="locations.html">Местоположения</a>
+            <a href="investigations.html" class="active">Разследвания</a>
+            <a href="feedback.html">Обратна връзка</a>
+        </nav>
+    </header>
+
+    <main class="hero-section">
+        <h2 class="page-title">Резултати от разследванията</h2>
+        <div class="glass-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Пожар №</th>
+                        <th>Отговорна служба</th>
+                        <th>Събрани доказателства</th>
+                        <th>Оценка щети (€)</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody id="investigationsBody">
+                    <tr><td colspan="5">Зареждане на данни...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        db.ref('Razsledvaniq').on('value', (snapshot) => {
+            const tbody = document.getElementById('investigationsBody');
+            tbody.innerHTML = '';
+            
+            snapshot.forEach(child => {
+                const inv = child.val() || {};
+                
+                // Динамично търсене на полетата без значение от интервали, двоеточия или главни/малки букви
+                let agency = '-';
+                let evidence = '-';
+                let amount = 0;
+                let status = '-';
+                let fireId = inv.пожар_id || child.key;
+
+                Object.keys(inv).forEach(key => {
+                    const cleanKey = key.trim().toLowerCase().replace(':', '');
+                    const val = inv[key];
+
+                    if (cleanKey.includes('отговорна')) agency = val;
+                    if (cleanKey.includes('доказателства')) evidence = val;
+                    if (cleanKey.includes('щети') || cleanKey.includes('оценка')) amount = val;
+                    if (cleanKey.includes('статус')) status = val;
+                });
+                
+                let statusClass = String(status).trim() === 'Приключено' ? 'badge-finished' : 'badge-process';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>#${fireId}</b></td>
+                        <td>${agency}</td>
+                        <td>${evidence}</td>
+                        <td><b>${Number(amount || 0).toLocaleString('de-DE')} €</b></td>
+                        <td><span class="badge ${statusClass}">${status}</span></td>
+                    </tr>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>

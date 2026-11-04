@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Wildfire Trace | Местоположения</title>
+    <link rel="stylesheet" href="investigations.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">🔥 Wildfire Trace &nbsp;|&nbsp; <span class="subtitle">Местоположения</span></div>
+        <nav class="nav-links">
+            <a href="index.html">Начало</a>
+            <a href="fires.html">Пожари</a>
+            <a href="locations.html" class="active">Местоположения</a>
+            <a href="investigations.html">Разследвания</a>
+            <a href="feedback.html">Обратна връзка</a>
+        </nav>
+    </header>
+
+    <main class="hero-section">
+        <h2 class="page-title">Засегнати региони и оценка на риска</h2>
+        <div class="glass-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Регион</th>
+                        <th>Близки населени места</th>
+                        <th>Засегната площ (дка)</th>
+                        <th>Рисков индекс</th>
+                    </tr>
+                </thead>
+                <tbody id="locationsBody">
+                    <tr><td colspan="4">Зареждане на данни...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        db.ref('locations').on('value', (snapshot) => {
+    const tbody = document.getElementById('locationsBody');
+    tbody.innerHTML = '';
+
+    if (!snapshot.exists()) {
+        tbody.innerHTML = '<tr><td colspan="4">Няма намерени данни.</td></tr>';
+        return;
+    }
+
+    snapshot.forEach(child => {
+        const loc = child.val() || {};
+
+        let region = '-';
+        let places = '-';
+        let area = '-';
+        let risk = '-';
+
+        Object.keys(loc).forEach(key => {
+            const cleanKey = key.trim().toLowerCase();
+            const val = loc[key];
+
+            if (cleanKey.includes('регион')) region = val;
+            if (cleanKey.includes('близки') || cleanKey.includes('места')) places = val;
+            if (cleanKey.includes('площ')) {
+                // Проверява дали стойността е валидно число
+                area = !isNaN(val) && val !== '' ? val : '-';
+            }
+            if (cleanKey.includes('риск')) risk = val;
+        });
+
+        tbody.innerHTML += `
+            <tr>
+                <td><b>${region}</b></td>
+                <td>${places}</td>
+                <td>${area}</td>
+                <td><span class="badge badge-process">${risk}</span></td>
+            </tr>
+        `;
+    });
+});
+    </script>
+</body>
+</html>

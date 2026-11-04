@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Wildfire Trace | Обратна връзка</title>
+    <link rel="stylesheet" href="feedback.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">🔥 Wildfire Trace &nbsp;|&nbsp; <span class="subtitle">Обратна връзка</span></div>
+        <nav class="nav-links">
+            <a href="index.html">Начало</a>
+            <a href="fires.html">Пожари</a>
+            <a href="locations.html">Местоположения</a>
+            <a href="investigations.html">Разследвания</a>
+            <a href="feedback.html" class="active">Обратна връзка</a>
+        </nav>
+    </header>
+
+    <main class="hero-section">
+        <h2 class="page-title">Подай сигнал за пожар или дим</h2>
+
+        <div class="glass-card">
+            <form id="signalForm">
+                <div class="form-group">
+                    <label>Двете ви имена:</label>
+                    <input type="text" id="name" placeholder="Иван Иванов" required>
+                </div>
+                <div class="form-group">
+                    <label>Телефон за връзка:</label>
+                    <input type="text" id="phone" placeholder="0888123456" required>
+                </div>
+                <div class="form-group">
+                    <label>Местоположение / Ориентир:</label>
+                    <input type="text" id="location" placeholder="напр. над с. Брежани" required>
+                </div>
+                <div class="form-group">
+                    <label>Описание на ситуацията:</label>
+                    <textarea id="description" rows="3" placeholder="Опишете какво виждате..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Изпрати сигнала</button>
+            </form>
+            <div id="alertMsg" class="alert-success" style="display:none;">✅ Сигналът ви беше записан успешно във Firebase!</div>
+        </div>
+    </main>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        document.getElementById('signalForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const signalData = {
+                име: document.getElementById('name').value,
+                телефон: document.getElementById('phone').value,
+                местоположение: document.getElementById('location').value,
+                описание: document.getElementById('description').value,
+                дата: new Date().toLocaleDateString('bg-BG')
+            };
+
+            db.ref('сигнали').push(signalData, (error) => {
+                if(!error) {
+                    document.getElementById('signalForm').reset();
+                    document.getElementById('alertMsg').style.display = 'block';
+                    setTimeout(() => document.getElementById('alertMsg').style.display = 'none', 3000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

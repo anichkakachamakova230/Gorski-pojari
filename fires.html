@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Wildfire Trace | Пожари</title>
+    <link rel="stylesheet" href="investigations.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">🔥 Wildfire Trace &nbsp;|&nbsp; <span class="subtitle">Пожари</span></div>
+        <nav class="nav-links">
+            <a href="index.html">Начало</a>
+            <a href="fires.html" class="active">Пожари</a>
+            <a href="locations.html">Местоположения</a>
+            <a href="investigations.html">Разследвания</a>
+            <a href="feedback.html">Обратна връзка</a>
+        </nav>
+    </header>
+
+    <main class="hero-section">
+        <h2 class="page-title">Регистрирани горски пожари</h2>
+        <div class="glass-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Дата</th>
+                        <th>Местоположение</th>
+                        <th>Засегната площ (дка)</th>
+                        <th>Причина</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody id="firesBody">
+                    <tr><td colspan="7">Зареждане на данни...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        db.ref('fires').on('value', (snapshot) => {
+            const tbody = document.getElementById('firesBody');
+            tbody.innerHTML = '';
+
+            if (!snapshot.exists()) {
+                tbody.innerHTML = '<tr><td colspan="7">Няма намерени данни.</td></tr>';
+                return;
+            }
+
+            snapshot.forEach(child => {
+                const fire = child.val() || {};
+                const id = child.key;
+
+                let date = '-';
+                let location = '-';
+                let area = 0;
+                let reason = '-';
+                let status = 'В процес';
+
+                // Сканираме всички ключове и превръщаме всякакви латински букви в кирилски
+                Object.keys(fire).forEach(key => {
+                    // Нормализираме текста на ключа
+                    const cleanKey = key.trim()
+                        .toLowerCase()
+                        .replace(/e/g, 'е')
+                        .replace(/o/g, 'о')
+                        .replace(/a/g, 'а')
+                        .replace(/c/g, 'с')
+                        .replace(/p/g, 'р')
+                        .replace(/x/g, 'х')
+                        .replace(/y/g, 'ъ')
+                        .replace(/:/g, '');
+
+                    const val = fire[key];
+
+                    // Записваме първото намерено поле, което съдържа "место"
+                    if (cleanKey.includes('место')) {
+                        location = val;
+                    }
+                    if (cleanKey.includes('дата')) {
+                        date = val;
+                    }
+                    if (cleanKey.includes('площ')) {
+                        area = val;
+                    }
+                    if (cleanKey.includes('причина')) {
+                        reason = val;
+                    }
+                    if (cleanKey.includes('статус')) {
+                        status = val;
+                    }
+                });
+
+                // Ако все още няма намерено местоположение, вземаме първата стойност, която е дълъг текст
+                if (location === '-') {
+                    Object.keys(fire).forEach(key => {
+                        const val = fire[key];
+                        if (typeof val === 'string' && val.length > 8 && !val.includes('.')) {
+                            location = val;
+                        }
+                    });
+                }
+
+                let statusClass = 'badge-process';
+                const lowerStatus = String(status).trim().toLowerCase();
+                if (lowerStatus === 'приключено') statusClass = 'badge-finished';
+                if (lowerStatus === 'овладян') statusClass = 'badge-contained';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${id}</b></td>
+                        <td>${date}</td>
+                        <td>${location}</td>
+                        <td>${area}</td>
+                        <td>${reason}</td>
+                        <td><span class="badge ${statusClass}">${status}</span></td>
+                        <td><a href="details.html?id=${id}" class="btn-details">Детайли</a></td>
+                    </tr>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
