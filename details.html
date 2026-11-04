@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Wildfire Trace | Детайли за пожар</title>
+    <link rel="stylesheet" href="investigations.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">🔥 Wildfire Trace &nbsp;|&nbsp; <span class="subtitle">Детайли</span></div>
+        <nav class="nav-links">
+            <a href="index.html">Начало</a>
+            <a href="fires.html">Пожари</a>
+            <a href="locations.html">Местоположения</a>
+            <a href="investigations.html">Разследвания</a>
+            <a href="feedback.html">Обратна връзка</a>
+        </nav>
+    </header>
+
+    <main class="hero-section">
+        <h2 class="page-title">Подробна информация за инцидента</h2>
+        <div class="glass-card" id="detailsContainer">
+            <p>Зареждане на данни...</p>
+        </div>
+    </main>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        let fireId = urlParams.get('id') || '1';
+
+        db.ref('fires/' + fireId).on('value', (snapshot) => {
+            const container = document.getElementById('detailsContainer');
+
+            if (!snapshot.exists()) {
+                container.innerHTML = `<p style="text-align: center;">Няма намерени данни за пожар #${fireId}.</p>`;
+                return;
+            }
+
+            const fire = snapshot.val() || {};
+
+            let date = '-';
+            let location = '-';
+            let area = 0;
+            let reason = '-';
+            let status = 'В процес';
+
+            // 1. Директно четене на известните варианти на ключовете
+            location = fire['Местоположение:'] || fire['Местоположение :'] || fire['Местоположение'] || fire['местоположение'] || '-';
+            date = fire['Дата:'] || fire['Дата::'] || fire['Дата'] || fire['дата'] || '-';
+            area = fire['Площ:'] || fire['площ:'] || fire['площ'] || fire['Площ'] || 0;
+            reason = fire['Причина:'] || fire['причина:'] || fire['причина'] || fire['Причина'] || '-';
+            status = fire['Статус:'] || fire['статус:'] || fire['статус'] || fire['Статус'] || 'В процес';
+
+            // 2. Умно обхождане, ако location все още е '-'
+            if (location === '-') {
+                Object.keys(fire).forEach(key => {
+                    const cleanKey = key.trim()
+                        .toLowerCase()
+                        .replace(/:/g, '')
+                        .replace(/e/g, 'е')
+                        .replace(/o/g, 'о')
+                        .replace(/a/g, 'а')
+                        .replace(/c/g, 'с');
+
+                    const val = fire[key];
+
+                    if (cleanKey.includes('место') || cleanKey.includes('mesto')) {
+                        location = val;
+                    }
+                });
+            }
+
+            let statusClass = 'badge-process';
+            const lowerStatus = String(status).trim().toLowerCase();
+            if (lowerStatus === 'приключено') statusClass = 'badge-finished';
+            if (lowerStatus === 'овладян') statusClass = 'badge-contained';
+
+            container.innerHTML = `
+                <div style="padding: 10px;">
+                    <h3 style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px;">
+                        Информация за Пожар №${fireId}
+                    </h3>
+                    <p style="margin: 12px 0;"><b>Местоположение:</b> ${location}</p>
+                    <p style="margin: 12px 0;"><b>Дата на възникване:</b> ${date}</p>
+                    <p style="margin: 12px 0;"><b>Засегната площ:</b> ${area} дка</p>
+                    <p style="margin: 12px 0;"><b>Предполагаема причина:</b> ${reason}</p>
+                    <p style="margin: 12px 0;"><b>Текущ статус:</b> <span class="badge ${statusClass}">${status}</span></p>
+                    <div style="margin-top: 25px;">
+                        <a href="fires.html" class="btn-details" style="text-decoration: none; display: inline-block;">← Назад към всички пожари</a>
+                    </div>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>
